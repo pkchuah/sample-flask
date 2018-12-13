@@ -3,6 +3,13 @@ import re
 from textblob import classifiers
 from textblob import TextBlob
 	
+alphabets="([A-Za-z])"
+prefixes="(Mr|St|Mrs|Ms|Dr)[.]"
+suffixes="(Inc|Ltd|Jr|Sr|Co)"
+starters="(Mr|Mrs|Ms|Dr|He\s|She\s|It\s|They\s|Their\s|Our\s|We\s|But\s|However\s|That\s|This\s|Wherever)"
+acronyms="([A-Z][.][A-Z][.](?:[A-Z][.])?)"
+websites="[.](com|net|org|io|gov)"
+
 def split_into_sentences(text):
    text = " " + text + "  "
    text = text.replace("\n"," ")
@@ -30,12 +37,7 @@ def split_into_sentences(text):
    return sentences
 		
 def lambda_handler(event, context):
-   alphabets="([A-Za-z])"
-   prefixes="(Mr|St|Mrs|Ms|Dr)[.]"
-   suffixes="(Inc|Ltd|Jr|Sr|Co)"
-   starters="(Mr|Mrs|Ms|Dr|He\s|She\s|It\s|They\s|Their\s|Our\s|We\s|But\s|However\s|That\s|This\s|Wherever)"
-   acronyms="([A-Z][.][A-Z][.](?:[A-Z][.])?)"
-   websites="[.](com|net|org|io|gov)"
+
 
    training2 = [
 	("Bachelor Degree or Diploma","skill"),
