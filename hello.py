@@ -3,6 +3,7 @@ import json
 import re
 from textblob import classifiers
 from textblob import TextBlob
+from flask import request
 
 app = Flask(__name__)
 
@@ -41,6 +42,8 @@ def split_into_sentences(text):
    
 @app.route("/")
 def hello():
+
+	text = request.args.get('text', default = '*', type = str)
 	training2 = [
 		("Bachelor Degree or Diploma","skill"),
 		("At least 3 years of working experience","skill"),
@@ -103,9 +106,7 @@ def hello():
 
 	classifier = classifiers.NaiveBayesClassifier(training2)
 
-	textkk = "As our Front End Web Developer, you will be responsible for creating a fully functional user interface that enhances the experience of our customers. In this role, your input will be directly reflected in the products we develop and define pathways for future features to pursue. apidly design, prototype to meet the user requirements. Work closely with stakeholders and back-end developers to implement versatile front-end solutions. Design the overall architecture of the front-end web application and create website and web dashboard layouts/user interface. Write well designed, testable, efficient code in line with best software development practices. Candidates must possess at least a Bachelor's Degree in Computer Science. 5 Years of working experience in web frameworks. Proficiency in using React, HTML5, CSS3 and JavaScript GIT,Babel.js. Strong experience with Redux. You will join a fast-growing, dynamic and talented team with deep technological know-how. We have great team spirit and a diverse and creative culture. We believe in and promote good work-life balance. You'll have the chance to join one of the fastest growing e-commerce platforms in the world!"
-
-	ll = split_into_sentences(textkk)
+	ll = split_into_sentences(text)
 
 	types_of_sentences = []
 	for xx in ll:
