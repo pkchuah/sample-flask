@@ -4,6 +4,7 @@ import re
 from textblob import classifiers
 from textblob import TextBlob
 from flask import request
+from html.parser import HTMLParser
 
 app = Flask(__name__)
 
@@ -14,6 +15,19 @@ starters="(Mr|Mrs|Ms|Dr|He\s|She\s|It\s|They\s|Their\s|Our\s|We\s|But\s|However\
 acronyms="([A-Z][.][A-Z][.](?:[A-Z][.])?)"
 websites="[.](com|net|org|io|gov)"
 	
+def remove_html(anystring):
+   parser=HTMLParser()
+   anystring = re.sub(".</li>",".",anystring)
+   anystring = re.sub(".<br>",".",anystring)
+   anystring = re.sub(".</div>",".",anystring)
+   anystring = parser.unescape(anystring)
+   anystring=re.sub("<.*?>"," ",anystring)
+   #anystring = re.sub("[^a-zA-Z0-9,\':; \-]",".",anystring)
+   anystring = re.sub("&\w+;"," ",anystring)
+   anystring=re.sub("\xa0"," ",anystring)
+   anystring = re.sub(r'\.+', ".", anystring)
+   return anystring
+
 def split_into_sentences(text):
    text = " " + text + "  "
    text = text.replace("\n"," ")
@@ -106,13 +120,57 @@ def hello():
 
 	classifier = classifiers.NaiveBayesClassifier(training2)
 
-	ll = split_into_sentences(text)
+	textkk = remove_html(text)
+	ll = split_into_sentences(textkk)
 
 	types_of_sentences = []
 	for xx in ll:
 	   blob=TextBlob(xx, classifier=classifier)
 	   types_of_sentences.append(blob.classify())
+	   
+	   
+	role_desc_num = types_of_sentences.count('role_desc')
+	task_num = types_of_sentences.count('task')
+	skill_num = types_of_sentences.count('skill')
+	benefits_num = types_of_sentences.count('benefits')
 
-	return json.dumps(types_of_sentences)
+	if role_desc_num >1:
+	  msg_1 = "Role Descriptions: You have role descriptions! Great!"
+	else:
+	  msg_1 = "Role Descriptions: You do not have any role descriptions.\n"+\
+			   "We suggest you include an inspiring description of the role "+\
+			   "that you are advertising for to attract potential candidates. "+\
+			   "Tell the candidate what the role is!\n"+\
+			   "eg. \"You will be able to enhance the experience of our customers!\""
+
+			   
+	if task_num >1:
+	  msg_2 = "Task Descriptions: You have tasks descriptions! Great!"
+	else:
+	  msg_2 = "Tasks Descriptions: You do not have any tasks descriptions.\n "+\
+			   "We suggest you include a short description of some of the tasks "+\
+			   "involved in this role. "+\
+			   "Tell the candidate what kinds of interesting things they will be doing!\n "+\
+			   "eg. \"You will create website and web dashboard layouts.\""
+
+	if skill_num >1:
+	  msg_3 = "Skills and Qualifications: You have described the skills needed."
+	else:
+	  msg_3 = "Skills and Qualifications: You do not have any skills described.\n"+\
+			   "We suggest that you include only skills that are absolutely needed, "+\
+			   "in order to attract as wide a pool of candidates as possible. "+\
+			   "The following skills are suggested for this role:\n"+\
+			   "eg. \"React, CSS, HTML5\""
+			   
+	if benefits_num >1:
+	  msg_4 = "Perks of the job: You have included the perks! Great!"
+	else:
+	  msg_4 = "Perks of the job: You do not have any perks to attract the candidate to apply.\n"+\
+			   "We suggest you include attractive reasons for the candidate to apply. "+\
+			   "Perhaps you have flexible working hours or good work-life balance. "+\
+			   "Sell the position to the candidate!\n"+\
+			   "eg. \"We promote fast career growth.\""   
+
+	return json.dumps([msg_1, msg_2, msg_3, msg_4])
 	
 app.run(port=8080)
